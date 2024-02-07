@@ -1,23 +1,45 @@
 const express = require('express');
-const http = require('http');
 const socketIO = require('socket.io');
+const cors = require('cors'); // Cross-Origin Resource Sharing
+
+const SERVERPORT = 3001;
+
 
 //.env file access
 require('dotenv').config();
 
 const app = express(); // create an express app
-const server = http.createServer(app); // create a http server on express app
-const chatApp = socketIO(server); // create a socket.io server on localhost:3002
-
-
 app.use(express.json()); // parse json data
+
+// since we are running the server on a different port from the client, we need to enable cors
+app.use(cors({
+  origin: "http://localhost:3000", // allow client port from localhost:3000
+  methods: ["GET", "POST"], // to allow get and post requests
+  credentials: true // Allow cookies and HTTP authentication
+})); // enable cors
+
+
+const server = app.listen(SERVERPORT, () => {
+  console.log(`Server started at localhost:${SERVERPORT}`);
+});
+
+
+const chatApp = socketIO(server, {
+  cors: {
+    origin: "http://localhost:3000", // allow client  from localhost:3000
+    methods: ["GET", "POST"], // to allow get and post requests
+    credentials: true // Allow cookies and HTTP authentication
+  } 
+
+}); // create a socket.io server on localhost:3001
+
+
 
 
 // connect to mongoDB
 const mongoose = require('mongoose');
 
 
-const SERVERPORT = 3001;
 
 // ============ MongoDB connection ============
 // Connect to MongoDB
@@ -35,6 +57,11 @@ mongoose.connect(DB_CONN, {
 }).catch( (error) => {
   console.log('Error Mongodb connection')
 });
+
+// ============ Models ============
+// Models are used to create a schema for the data that will be stored in the database
+// and to be able to store directly to the database
+const GroupMsg = require('./models/GroupMsgModel');
 
 
 // ============ Routes ============
@@ -54,7 +81,44 @@ app.use('/v1/room', routes.groupMsg);
 // ============ Socket.io ============
 // Socket.io
 
+chatApp.on('connection', (socket) => {
 
-app.listen(SERVERPORT, () => { console.log(`Server is running on localhost:${SERVERPORT}`) });
+  // console.log('New user connected');
 
+  // join room on the server side when user joins room
+  socket.on('join_room', (room) => {
+    socket.join(room);
+    // console.log(`User joined room: ${room}`)
+  });
+
+
+  // leave room on the server side when user leaves room
+  socket.on('leave_room', (room) => {
+    socket.leave(room);
+    // console.log(`User left room: ${room}`);
+  });
+
+
+  // listen for chat message from client
+  // from the client side we will emit a chatMessage event
+  // and find .on('chatMessage') in server.js and execute the function
+  socket.on('chatMessage', async (msg) => {
+    console.log(msg);
+    try{
+      const message = new GroupMsg({
+        from_user: msg.from_user,
+        to_room: msg.room,
+        message: msg.message
+      });
+
+      const savedMessage = await message.save();
+
+      chatApp.to(msg.room).emit('receive_message', savedMessage);
+    }catch(err){
+      console.log(err);
+    }
+  });
+  
+
+});
 
