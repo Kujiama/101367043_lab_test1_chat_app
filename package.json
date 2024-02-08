@@ -1,0 +1,21 @@
+{
+  "name": "101367043_lab_test1_chat_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "startapp": "cd client && npm run start && cd .. && cd backend && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kujiama/101367043_lab_test1_chat_app.git"
+  },
+  "keywords": [],
+  "author": "Raul England Pelenio",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kujiama/101367043_lab_test1_chat_app/issues"
+  },
+  "homepage": "https://github.com/Kujiama/101367043_lab_test1_chat_app#readme"
+}
