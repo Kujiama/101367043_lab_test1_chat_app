@@ -1,14 +1,14 @@
-
 import axios from "axios";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 const Login = ({onLogin}) => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +18,7 @@ const Login = ({onLogin}) => {
                 //store username in local storage
                 localStorage.setItem('username', username);
                 onLogin(true);
-                Navigate('/rooms')
+                navigate('/rooms')
             }else{
                 alert('Invalid username or password');
             }

@@ -31,7 +31,11 @@ const RoomChat = () => {
 
         // Handle new user joining the room and leaving the room
         const handleJoin = (newUser) => {
-            setUsers(currentUsers => [...currentUsers, newUser.username]); // add user to the list
+            setUsers(currentUsers => {
+                // Convert to a Set to ensure uniqueness, then convert back to array
+                const updatedUsers = new Set([...currentUsers, newUser.username]);
+                return Array.from(updatedUsers);
+            });
         };
 
         const handleLeave = (leftUser) => {
@@ -56,7 +60,7 @@ const RoomChat = () => {
             // leave room on the server side when user leaves room
             socket.emit('leave_room', { name: room, user: user });
             socket.off('receive_message', handleNewMessage);
-            socket.off('user_joined', handleJoin);
+            socket.off('user_join', handleJoin);
         }
 
 
