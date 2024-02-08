@@ -13,7 +13,7 @@ app.use(express.json()); // parse json data
 
 // since we are running the server on a different port from the client, we need to enable cors
 app.use(cors({
-  origin: "http://localhost:3000", // allow client port from localhost:3000
+  origin: ["http://localhost:3001","http://localhost:3002", "http://localhost:3000"], // allow client from localhost:3000
   methods: ["GET", "POST"], // to allow get and post requests
   credentials: true // Allow cookies and HTTP authentication
 })); // enable cors
@@ -26,7 +26,7 @@ const server = app.listen(SERVERPORT, () => {
 
 const chatApp = socketIO(server, {
   cors: {
-    origin: "http://localhost:3000", // allow client  from localhost:3000
+    origin: ["http://localhost:3001","http://localhost:3002", "http://localhost:3000"], // allow client  from localhost:3000
     methods: ["GET", "POST"], // to allow get and post requests
     credentials: true // Allow cookies and HTTP authentication
   } 
@@ -83,19 +83,22 @@ app.use('/v1/room', routes.groupMsg);
 
 chatApp.on('connection', (socket) => {
 
+
   // console.log('New user connected');
 
   // join room on the server side when user joins room
   socket.on('join_room', (room) => {
-    socket.join(room);
-    // console.log(`User joined room: ${room}`)
+    socket.join(room.name);
+    console.log(`${room.user} joined room: ${room.name}`);
+    chatApp.to(room.name).emit('user_join', { username: room.user });
   });
 
 
   // leave room on the server side when user leaves room
   socket.on('leave_room', (room) => {
-    socket.leave(room);
-    // console.log(`User left room: ${room}`);
+    socket.leave(room.name);
+    console.log(`${room.user} left room: ${room.name}`);
+    chatApp.to(room.name).emit('user_leave', { username: room.user });
   });
 
 
