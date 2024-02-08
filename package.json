@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startapp": "cd client && npm run start && cd .. && cd backend && npm run start"
+    "startapp": "cd client && npm run start && cd .. && cd backend && npm run start",
+    "installDep": "cd client && npm install && cd .. && cd backend && npm install"
   },
   "repository": {
     "type": "git",
